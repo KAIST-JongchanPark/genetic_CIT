@@ -18,9 +18,9 @@ def greedy_cit(t, ps, k):
 def add_first_t_combination(ts, ps, k, t):
     parameter = ps[:t]
     val = []
-    comb = func(parameter, k)
+    comb = get_combination(parameter, k)
 
-def func(parameter, k):
+def get_combination(parameter, k):
     if len(parameter) == 1:
         result = []
         for val in range(k):
@@ -38,4 +38,3 @@ def func(parameter, k):
             result = result + buf
         return result
 
-print(add_first_t_combination(set(), ["x", "y", "z"], 3, 3))
