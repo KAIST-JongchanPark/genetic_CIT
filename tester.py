@@ -20,11 +20,11 @@ instance 만들기: new_instance = Tester.instance()
 
 Tester의 True condition initialize: new_instance.reset(argnum), argnum은 테스트할 파라미터 개수를 입력
 
-True condition 갱신: 위와 같음.
+True condition 갱신: 위와 같음. new_instance.reset(argnum)
 
-실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]
+실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. 모든 파라미터가 통과시 0을 반환. 하나라도 통과 실패시 -1 반환.
 
-True condition 값 확인: new_instance.get_range(), True condition 범위의 시작값들을 리스트로 반환.
+True condition 값 확인: new_instance.get_range(), True condition 범위의 시작값들을 리스트로 반환. ex) 2개의 파라미터에 대한 True condition이 [0, 100), [100, 200) 이라면 [0, 100] 을 반환.
 
 
 
@@ -36,7 +36,7 @@ True condition 값 확인: new_instance.get_range(), True condition 범위의 �
 
 
 
-초기버전은 파라미터의 condition이 [-100000, 100000) 범위 중에서 100만큼의 range가 True 범위로 지정됨.
+초기버전은 파라미터의 condition이 [-100000, 100000) 범위 중에서 100만큼의 range가 True 범위로 지정됨. ex) [0, 100), [100, 200)
 
 '''
 
