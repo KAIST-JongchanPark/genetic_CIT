@@ -7,7 +7,7 @@ def greedy_cit(t, ps, k):
     parameter_num = len(ps)
     add_first_t_combination(ts, ps, value_range, t)
     for i in range(t + 1, parameter_num + 1):
-        p = t_way_comb(t, i, value_range)
+        pi = t_way_comb(t, i, value_range)
         for test in ts:
             test_added = choose_value(i, test, p)
             remove_value(test_added, p)
@@ -48,7 +48,7 @@ def get_combination_by_num(parameter_num, k):
             result.append([val])
         return result
     else:
-        prior_result = get_combination(parameter_num - 1, k)
+        prior_result = get_combination_by_num(parameter_num - 1, k)
         result = []
         for val in range(k):
             buf = []
@@ -63,14 +63,19 @@ def get_comb_list(l, r):
     return list(itertools.combinations(l, r))
 
 def t_way_comb(t, i, k):
+    pi = []
+    comb_set = get_combination_by_num(t - 1, k)
     for val in range(k):
         l = [-1 for _ in range(i)]
         l[i - 1] = val
-        comb_set = 
-        index_list = [x for x in range(i)]
+        index_list = [x for x in range(i - 1)]
         to_iter = get_comb_list(index_list, t - 1) # (1, 2) (2, 3) (1, 3)
+        res = []
         for index_tuple in to_iter:
-            for index in index_tuple:
-                
-
-print(get_comb_list([1,2,3,4], 3))
+            for comb in comb_set:
+                l_copy = l[:]
+                for index, l_index in enumerate(index_tuple):
+                    l_copy[l_index] = comb[index]
+                res.append(l_copy)
+        pi = pi + res
+    return pi   
