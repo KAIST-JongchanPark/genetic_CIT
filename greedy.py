@@ -165,5 +165,3 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0    
     return test
-
-print(greedy_cit(2, ["x", "y", "z"], 1))
