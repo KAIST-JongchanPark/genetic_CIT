@@ -8,9 +8,10 @@ def greedy_cit(t, ps, k):
     ts = add_first_t_combination(ts, ps, value_range, t)
     for i in range(t + 1, parameter_num + 1):
         pi = t_way_comb(t, i, value_range)
-        for test in ts:
+        for test in ts[:]:
             test_added, pi = choose_value(i, test, pi, k)
             ts.append(test_added)
+            ts.remove(test)
         for alpha in pi[:]:
             if exist_cover(alpha, ts):
                 pi.remove(alpha)
@@ -83,7 +84,8 @@ def t_way_comb(t, i, k):
 
 def is_cover(param1, param2):
     is_covered = True
-    for i, param in enumerate(parma1):
+
+    for i, param in enumerate(param1):
         if param == -1:
             continue
         if param != param2[i]:
@@ -106,10 +108,12 @@ def get_covered(pi, t):
 def choose_value(i, test, pi, k):
     cover_num = [0 for x in range(k)] # cover_num의 index는 P-i의 값
     for x in range(k):
-        t = test[:].append(x)
+        t = test[:]
+        t.append(x)
         cover_num[x] = get_covered(pi, t)
     add = cover_num.index(max(cover_num))
-    test_add = test[:].append(add)
+    test_add = test[:]
+    test_add.append(add)
     new_pi = remove_value(test_add, pi)
     return test_add, new_pi
 
@@ -120,7 +124,7 @@ def remove_value(test, pi):
         for i, param in enumerate(comb):
             if param == -1:
                 continue
-            if param != t[i]:
+            if param != test[i]:
                 is_covered = False
         if not is_covered:
             new_pi.append(comb)
@@ -161,3 +165,5 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0    
     return test
+
+print(greedy_cit(2, ["x", "y", "z"], 1))
