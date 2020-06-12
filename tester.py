@@ -19,38 +19,41 @@ class SingletonInstane: # Singleton 포맷의 클래스. 한번 Tester 클래스
 
 instance 만들기: new_instance = Tester.instance()
 
-Tester의 False condition initialize: new_instance.reset(argnum, max_range, error_rate), argnum은 테스트할 파라미터 개수를 입력, max_range는 파라미터의 범위 최대값, error_rate는 전체 가능한 value 조합중 error 의 비율
+Tester의 False condition initialize: new_instance.reset(argnum, max_value, error_rate, correction_range),
+argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터의 범위 최대값, error_rate는 전체 가능한 value 조합중 error 의 비율 correction_range는 parameter를 고정하고싶은 특정 range.
 
-False condition 갱신: 위와 같음. new_instance.reset(argnum)
+False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, error_rate, correction_range)
 
 실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. False condition에 해당하는 경우 -1 반환, 아니면 0
 
-False condition 값 확인: new_instance.get_range(), False condition 범위의 시작값들을 리스트로 반환. range()의 list 형태를 가지고 있음.
+False condition 값 확인: new_instance.get_range(), False condition 범위를 리스트로 반환. range()의 list 형태를 가지고 있음.
 
 
 
 1. instance 생성 -> new_instance = Tester.instance()
-2. False condition initialize(처음 한번 필수) -> new_instance.reset(argnum, max_range, error_rate)
+2. False condition initialize(처음 한번 필수) -> new_instance.reset(argnum, max_value, error_rate, correction_range)
 3. Test 실행 -> new_instance.run(input)
 
 이후 필요에 따라 reset() 이나 get_range() 적절히 활용
 
 
 
-현재 버전은 파라미터의 condition이 [0, max_range) 범위 중에서 10만큼의 range가 False인 경우로 지정. 원하는 error_rate를 만족하지 못하면 condition을 추가.
-ex) 파라미터 3개: [ [range(11,21), range(30,40), range(44, 54)], [range(2,12), range(51,61), range(99, 109)], ... ]
+현재 버전은 parameter의 condition이 [0, max_value) 범위 중에서 10만큼의 range가 False인 경우로 지정. 원하는 error_rate를 만족하지 못하면 condition을 추가.
+원하는 확률로 특정 parameter를 특정 range로 고정할수 있음. correction_range = 원하는 range ex) [(parameter index, range(a, b), correction_rate), ...]
+ex) parameter 3개: [ [range(11,21), range(30,40), range(44, 54)], [range(2,12), range(51,61), range(99, 109)], ... ]
+ex2) parameter 2개 with correction: [(1, range(10,20), 0.5)] : [ [range(11,21), range(10, 20)], [range(2,12), range(51,61)], [range(52,62), range(10, 20)], [range(86,96), range(32,42)], ... ]
 
 '''
 
 class Tester(SingletonInstane):
     def __init__(self):
         self.argnum = 0 # 테스트할 parameter 개수
-        self.max_range = 0 # parameter의 최대값
+        self.max_value = 0 # parameter의 최대값
         self.error_rate = 0 # 모든 경우 중 error case 비율
         self.condition = [] # parameter 별 False condition을 담고있는 list
         self._initCondition()
 
-    def _initCondition(self): # 클래스 구현용 내부함수. self.condition을 initialize 하는 함수.
+    def _initCondition(self, condition_range = 10, correction_range=[]): # 클래스 구현용 내부함수. self.condition을 initialize 하는 함수.
         self.condition = []
 
         current_error_rate = 0
@@ -59,21 +62,28 @@ class Tester(SingletonInstane):
             temp_condition = []
             temp_error_rate = 1
 
-            for _ in range(self.argnum):
-                rand_range_start = random.randrange(0, self.max_range-10)
-                temp_condition.append(range(rand_range_start, rand_range_start+10))
-                temp_error_rate *= 10/self.max_range
+            for i in range(self.argnum):
+                for correction in correction_range:
+                    if correction != None and correction[0] == i and random.random() <= correction[2]:
+                        temp_condition.append(correction[1])
+                        temp_error_rate *= condition_range/self.max_value
+                        break
+                else:
+                    rand_range_start = random.randrange(0, self.max_value-condition_range)
+                    temp_condition.append(range(rand_range_start, rand_range_start+condition_range))
+                    temp_error_rate *= condition_range/self.max_value
 
             self.condition.append(temp_condition)
             current_error_rate += temp_error_rate
+            print(current_error_rate)
 
             # self.condition.append(lambda x: x[i] in temp_condition[i] for i in range(self.argnum))
     
-    def reset(self, argnum=0, max_range=0, error_rate = 0, correction_range = None): # condition을 initialize 하기위한 함수.
+    def reset(self, argnum=0, max_value=0, condition_range = 10, error_rate = 0, correction_range = []): # condition을 initialize 하기위한 함수.
         self.argnum = argnum
-        self.max_range = max_range
+        self.max_value = max_value
         self.error_rate = error_rate
-        self._initCondition()
+        self._initCondition(condition_range, correction_range)
     
     def run(self, arglist): # 실제로 테스트 할 때 사용하는 함수.
         result = []
@@ -96,8 +106,9 @@ class Tester(SingletonInstane):
 
             
 
-if __name__ == "__main__":
-    test = Tester.instance()
-    test.reset(argnum=2, max_range = 199, error_rate = 0.1)
-    print(test.run([[10, 10], [20, 30]]))
-    print(test.get_range())
+# if __name__ == "__main__":
+#     test = Tester.instance()
+#     test.reset(argnum=2, max_value = 199, condition_range = 10, error_rate = 0.1, correction_range=[(0, range(5,15), 0.8), (1, range(10,20), 0.8)])
+#     print(test.run([[10, 10], [20, 30]]))
+#     print(test.get_range())
+#     print(len(test.get_range()))
