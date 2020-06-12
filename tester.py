@@ -75,7 +75,6 @@ class Tester(SingletonInstane):
 
             self.condition.append(temp_condition)
             current_error_rate += temp_error_rate
-            print(current_error_rate)
 
             # self.condition.append(lambda x: x[i] in temp_condition[i] for i in range(self.argnum))
     
