@@ -19,10 +19,10 @@ class SingletonInstane: # Singleton 포맷의 클래스. 한번 Tester 클래스
 
 instance 만들기: new_instance = Tester.instance()
 
-Tester의 False condition initialize: new_instance.reset(argnum, max_value, error_rate, correction_range),
-argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터의 범위 최대값, error_rate는 전체 가능한 value 조합중 error 의 비율 correction_range는 parameter를 고정하고싶은 특정 range.
+Tester의 False condition initialize: new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range),
+argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터의 value의 최대값, condition_range는 parameter의 condition range, error_rate는 전체 가능한 value 조합중 error 의 비율 correction_range는 parameter를 고정하고싶은 특정 range.
 
-False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, error_rate, correction_range)
+False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range)
 
 실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. False condition에 해당하는 경우 -1 반환, 아니면 0
 
@@ -31,7 +31,7 @@ False condition 값 확인: new_instance.get_range(), False condition 범위를 
 
 
 1. instance 생성 -> new_instance = Tester.instance()
-2. False condition initialize(처음 한번 필수) -> new_instance.reset(argnum, max_value, error_rate, correction_range)
+2. False condition initialize(처음 한번 필수) -> new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range)
 3. Test 실행 -> new_instance.run(input)
 
 이후 필요에 따라 reset() 이나 get_range() 적절히 활용
