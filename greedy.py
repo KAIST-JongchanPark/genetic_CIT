@@ -1,5 +1,6 @@
 import itertools
 
+
 def greedy_cit(t, ps, k):
     value_range = k + 1
     ts = []
@@ -19,11 +20,13 @@ def greedy_cit(t, ps, k):
                 ts.append(fix_testcase(pi, alpha))
     return ts
 
+
 def add_first_t_combination(ts, ps, k, t):
     parameter = ps[:t]
     val = []
     comb = get_combination(parameter, k)
     return comb
+
 
 def get_combination(parameter, k):
     if len(parameter) == 1:
@@ -43,6 +46,7 @@ def get_combination(parameter, k):
             result = result + buf
         return result
 
+
 def get_combination_by_num(parameter_num, k):
     if parameter_num == 1:
         result = []
@@ -61,8 +65,10 @@ def get_combination_by_num(parameter_num, k):
             result = result + buf
         return result
 
+
 def get_comb_list(l, r):
     return list(itertools.combinations(l, r))
+
 
 def t_way_comb(t, i, k):
     pi = []
@@ -71,7 +77,7 @@ def t_way_comb(t, i, k):
         l = [-1 for _ in range(i)]
         l[i - 1] = val
         index_list = [x for x in range(i - 1)]
-        to_iter = get_comb_list(index_list, t - 1) # (1, 2) (2, 3) (1, 3)
+        to_iter = get_comb_list(index_list, t - 1)  # (1, 2) (2, 3) (1, 3)
         res = []
         for index_tuple in to_iter:
             for comb in comb_set:
@@ -80,7 +86,8 @@ def t_way_comb(t, i, k):
                     l_copy[l_index] = comb[index]
                 res.append(l_copy)
         pi = pi + res
-    return pi   
+    return pi
+
 
 def is_cover(param1, param2):
     is_covered = True
@@ -91,6 +98,7 @@ def is_cover(param1, param2):
         if param != param2[i]:
             is_covered = False
     return is_covered
+
 
 def get_covered(pi, t):
     count = 0
@@ -105,8 +113,9 @@ def get_covered(pi, t):
             count += 1
     return count
 
+
 def choose_value(i, test, pi, k):
-    cover_num = [0 for x in range(k)] # cover_num의 index는 P-i의 값
+    cover_num = [0 for x in range(k)]  # cover_num의 index는 P-i의 값
     for x in range(k):
         t = test[:]
         t.append(x)
@@ -116,6 +125,7 @@ def choose_value(i, test, pi, k):
     test_add.append(add)
     new_pi = remove_value(test_add, pi)
     return test_add, new_pi
+
 
 def remove_value(test, pi):
     new_pi = []
@@ -130,11 +140,13 @@ def remove_value(test, pi):
             new_pi.append(comb)
     return new_pi
 
+
 def exist_cover(alpha, ts):
     for test in ts:
         if is_cover(alpha, test):
             return True
     return False
+
 
 def get_unassigned_index(alpha):
     unassigned = []
@@ -142,6 +154,7 @@ def get_unassigned_index(alpha):
         if val == -1:
             unassigned.append(index)
     return unassigned
+
 
 def check_zip(alpha1, alpha2):
     for i, j in zip(alpha1, alpha2):
@@ -152,7 +165,8 @@ def check_zip(alpha1, alpha2):
         if i != j:
             return False
     return True
-        
+
+
 def fix_testcase(pi, alpha):
     test = alpha
     for one in pi:
@@ -163,5 +177,6 @@ def fix_testcase(pi, alpha):
                         test[index] = one[index]
     unassigned = get_unassigned_index(test)
     for i in unassigned:
-        test[i] = 0    
+        test[i] = 0
     return test
+
