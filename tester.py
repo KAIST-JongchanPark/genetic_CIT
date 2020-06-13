@@ -20,11 +20,11 @@ class SingletonInstane: # Singleton 포맷의 클래스. 한번 Tester 클래스
 instance 만들기: new_instance = Tester.instance()
 
 Tester의 False condition initialize: new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range),
-argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터의 value의 최대값, condition_range는 parameter의 condition range, error_rate는 전체 가능한 value 조합중 error 의 비율 correction_range는 parameter를 고정하고싶은 특정 range.
+argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터의 value의 최대값, condition_range는 parameter의 condition range, error_rate는 전체 가능한 value 조합중 error 의 비율, correction_range는 parameter를 고정하고싶은 특정 range.
 
 False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range)
 
-실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. False condition에 해당하는 경우 -1 반환, 아니면 0
+실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. self.condition의 각각의 range에 대하여 False condition에 해당하는 경우 (-1, condition)를 반환, 아니면 (0, condition)
 
 False condition 값 확인: new_instance.get_range(), False condition 범위를 리스트로 반환. range()의 list 형태를 가지고 있음.
 
@@ -48,7 +48,7 @@ ex2) parameter 2개 with correction: [(1, range(10,20), 0.5)] : [ [range(11,21),
 class Tester(SingletonInstane):
     def __init__(self):
         self.argnum = 0 # 테스트할 parameter 개수
-        self.max_value = 0 # parameter의 최대값
+        self.max_value = 0 # parameter의 최댓값
         self.error_rate = 0 # 모든 경우 중 error case 비율
         self.condition = [] # parameter 별 False condition을 담고있는 list
         self._initCondition()
@@ -89,13 +89,15 @@ class Tester(SingletonInstane):
 
         for args in arglist:
             assert (len(args) == self.argnum)
-            result_temp = 0
+            result_temp = []
             for condition in self.condition:
                 for i in range(len(args)):
                     if not args[i] in condition[i]:
                         break
                 else:
-                    result_temp = -1
+                    result_temp.append((-1, condition))
+                    continue
+                result_temp.append((0, condition))
             result.append(result_temp)
 
         return result
