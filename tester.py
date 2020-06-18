@@ -24,7 +24,8 @@ argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터�
 
 False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range)
 
-실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. self.condition의 각각의 range에 대하여 False condition에 해당하는 경우 (-1, condition)를 반환, 아니면 (0, condition)
+실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. self.condition의 각각의 range에 대하여 False condition에 해당하는 경우 (-1, condition)를 반환, 아니면 (0, condition).
+최종 결과는 ( (False condition 의 비율, False condition 개수, 전체 condition 개수), [[첫번째 input의 각 condition별 결과], [두번째 ...], ...] ) 를 반환함.
 
 False condition 값 확인: new_instance.get_range(), False condition 범위를 리스트로 반환. range()의 list 형태를 가지고 있음.
 
@@ -86,21 +87,26 @@ class Tester(SingletonInstane):
     
     def run(self, arglist): # 실제로 테스트 할 때 사용하는 함수.
         result = []
+        condition_num = 0
+        answer_num = 0
 
         for args in arglist:
             assert (len(args) == self.argnum)
             result_temp = []
             for condition in self.condition:
+                condition_num += 1
                 for i in range(len(args)):
                     if not args[i] in condition[i]:
                         break
                 else:
+                    answer_num += 1
                     result_temp.append((-1, condition))
                     continue
                 result_temp.append((0, condition))
+
             result.append(result_temp)
 
-        return result
+        return ((answer_num / condition_num, answer_num, condition_num), result)
     
     def get_range(self): # 디버깅용 함수. self.condition 안의 조건을 반환하는 함수.
         return self.condition
