@@ -1,5 +1,21 @@
 import itertools
 
+# wrapper for greedy_cit function.
+# it enables using real value list
+def greedy_cit_for_general(t, ps, k):
+    range_list = []
+    for val in k:
+        range_list.append(len(val))
+    return greedy_cit(t, ps, range_list)
+
+# After get test suite composed of integer, 
+# this function can make real value test suite
+def get_real_test_suite(real_value, test_suite):
+    for test in test_suite:
+        for i, value in enumerate(test):
+            test[i] = real_value[i][value]
+    return test_suite
+
 def greedy_cit(t, ps, k):
     ts = []
     assign = {}
@@ -173,3 +189,5 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0    
     return test
+test_suite = greedy_cit_for_general(2, ["x", "y"], [["hi", "hello"], [".", ",", "?"]])
+print(get_real_test_suite([["hi", "hello"], [".", ",", "?"]], test_suite))
