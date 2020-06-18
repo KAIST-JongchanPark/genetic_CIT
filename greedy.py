@@ -1,15 +1,15 @@
 import itertools
 
 def greedy_cit(t, ps, k):
-    value_range = k + 1
     ts = []
     assign = {}
     parameter_num = len(ps)
-    ts = add_first_t_combination(ts, ps, value_range, t)
+    ts = add_first_t_combination(ts, ps, k, t)
     for i in range(t + 1, parameter_num + 1):
-        pi = t_way_comb(t, i, value_range)
+        pi = t_way_comb(t, i, k)
         for test in ts[:]:
-            test_added, pi = choose_value(i, test, pi, k)
+            print(i)
+            test_added, pi = choose_value(i, test, pi, k[i-1])
             ts.append(test_added)
             ts.remove(test)
         for alpha in pi[:]:
@@ -22,19 +22,20 @@ def greedy_cit(t, ps, k):
 def add_first_t_combination(ts, ps, k, t):
     parameter = ps[:t]
     val = []
+    value_range = k[:t]
     comb = get_combination(parameter, k)
     return comb
 
 def get_combination(parameter, k):
     if len(parameter) == 1:
         result = []
-        for val in range(k):
+        for val in range(k[0]):
             result.append([val])
         return result
     else:
-        prior_result = get_combination(parameter[1:], k)
+        prior_result = get_combination(parameter[1:], k[1:])
         result = []
-        for val in range(k):
+        for val in range(k[0]):
             buf = []
             for one in prior_result:
                 a = one[:]
@@ -46,13 +47,13 @@ def get_combination(parameter, k):
 def get_combination_by_num(parameter_num, k):
     if parameter_num == 1:
         result = []
-        for val in range(k):
+        for val in range(k[0]):
             result.append([val])
         return result
     else:
-        prior_result = get_combination_by_num(parameter_num - 1, k)
+        prior_result = get_combination_by_num(parameter_num - 1, k[1:])
         result = []
-        for val in range(k):
+        for val in range(k[0]):
             buf = []
             for one in prior_result:
                 a = one[:]
@@ -66,14 +67,15 @@ def get_comb_list(l, r):
 
 def t_way_comb(t, i, k):
     pi = []
-    comb_set = get_combination_by_num(t - 1, k)
-    for val in range(k):
+    for val in range(k[t]):
         l = [-1 for _ in range(i)]
         l[i - 1] = val
         index_list = [x for x in range(i - 1)]
         to_iter = get_comb_list(index_list, t - 1) # (1, 2) (2, 3) (1, 3)
         res = []
         for index_tuple in to_iter:
+            value_range = get_value_range(k, index_tuple)
+            comb_set = get_combination_by_num(t - 1, value_range)
             for comb in comb_set:
                 l_copy = l[:]
                 for index, l_index in enumerate(index_tuple):
@@ -81,6 +83,12 @@ def t_way_comb(t, i, k):
                 res.append(l_copy)
         pi = pi + res
     return pi   
+
+def get_value_range(k, index_tuple):
+    res = []
+    for i in index_tuple:
+        res.append(k[i])
+    return res
 
 def is_cover(param1, param2):
     is_covered = True
@@ -105,9 +113,9 @@ def get_covered(pi, t):
             count += 1
     return count
 
-def choose_value(i, test, pi, k):
-    cover_num = [0 for x in range(k)] # cover_num의 index는 P-i의 값
-    for x in range(k):
+def choose_value(i, test, pi, value):
+    cover_num = [0 for x in range(value)] # cover_num의 index는 P-i의 값
+    for x in range(value):
         t = test[:]
         t.append(x)
         cover_num[x] = get_covered(pi, t)
