@@ -9,7 +9,6 @@ def greedy_cit(t, ps, k):
     for i in range(t + 1, parameter_num + 1):
         pi = t_way_comb(t, i, k)
         for test in ts[:]:
-            print(i)
             test_added, pi = choose_value(i, test, pi, k[i-1])
             ts.append(test_added)
             ts.remove(test)
@@ -99,7 +98,6 @@ def get_value_range(k, index_tuple):
 
 def is_cover(param1, param2):
     is_covered = True
-
     for i, param in enumerate(param1):
         if param == -1:
             continue
@@ -186,4 +184,3 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0
     return test
-
