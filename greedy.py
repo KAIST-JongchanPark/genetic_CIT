@@ -1,23 +1,25 @@
 import itertools
 
-<<<<<<< HEAD
-=======
 # wrapper for greedy_cit function.
 # it enables using real value list
+
+
 def greedy_cit_for_general(t, ps, k):
     range_list = []
     for val in k:
         range_list.append(len(val))
     return greedy_cit(t, ps, range_list)
 
-# After get test suite composed of integer, 
+# After get test suite composed of integer,
 # this function can make real value test suite
+
+
 def get_real_test_suite(real_value, test_suite):
     for test in test_suite:
         for i, value in enumerate(test):
             test[i] = real_value[i][value]
     return test_suite
->>>>>>> 7d2b813b62933b68c2da95220079cc939c922649
+
 
 def greedy_cit(t, ps, k):
     ts = []
@@ -115,6 +117,7 @@ def get_value_range(k, index_tuple):
         res.append(k[i])
     return res
 
+
 def is_cover(param1, param2):
     is_covered = True
 
@@ -139,16 +142,10 @@ def get_covered(pi, t):
             count += 1
     return count
 
-<<<<<<< HEAD
 
-def choose_value(i, test, pi, k):
-    cover_num = [0 for x in range(k)]  # cover_num의 index는 P-i의 값
-    for x in range(k):
-=======
 def choose_value(i, test, pi, value):
-    cover_num = [0 for x in range(value)] # cover_num의 index는 P-i의 값
+    cover_num = [0 for x in range(value)]  # cover_num의 index는 P-i의 값
     for x in range(value):
->>>>>>> 7d2b813b62933b68c2da95220079cc939c922649
         t = test[:]
         t.append(x)
         cover_num[x] = get_covered(pi, t)
@@ -211,9 +208,8 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0
     return test
-<<<<<<< HEAD
 
-=======
-test_suite = greedy_cit_for_general(2, ["x", "y"], [["hi", "hello"], [".", ",", "?"]])
+
+test_suite = greedy_cit_for_general(
+    2, ["x", "y"], [["hi", "hello"], [".", ",", "?"]])
 print(get_real_test_suite([["hi", "hello"], [".", ",", "?"]], test_suite))
->>>>>>> 7d2b813b62933b68c2da95220079cc939c922649
