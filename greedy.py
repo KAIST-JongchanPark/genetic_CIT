@@ -119,7 +119,6 @@ def get_value_range(k, index_tuple):
 
 def is_cover(param1, param2):
     is_covered = True
-
     for i, param in enumerate(param1):
         if param == -1:
             continue
@@ -207,4 +206,3 @@ def fix_testcase(pi, alpha):
     for i in unassigned:
         test[i] = 0
     return test
-
