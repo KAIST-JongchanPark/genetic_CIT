@@ -29,7 +29,6 @@ def greedy_cit(t, ps, k):
     for i in range(t + 1, parameter_num + 1):
         pi = t_way_comb(t, i, k)
         for test in ts[:]:
-            print(i)
             test_added, pi = choose_value(i, test, pi, k[i-1])
             ts.append(test_added)
             ts.remove(test)
@@ -209,7 +208,3 @@ def fix_testcase(pi, alpha):
         test[i] = 0
     return test
 
-
-test_suite = greedy_cit_for_general(
-    2, ["x", "y"], [["hi", "hello"], [".", ",", "?"]])
-print(get_real_test_suite([["hi", "hello"], [".", ",", "?"]], test_suite))
