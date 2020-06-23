@@ -25,7 +25,7 @@ argnum은 테스트할 파라미터 개수를 입력, max_value는 파라미터�
 False condition 갱신: 위와 같음. new_instance.reset(argnum, max_value, condition_range, error_rate, correction_range)
 
 실제 테스트 진행: new_instance.run(arglist), arglist 는 테스트 input(2-dimension 리스트) 입력 ex) [[1,2,3], [-1,-2,-3]]. self.condition의 각각의 range에 대하여 False condition에 해당하는 경우 (-1, condition)를 반환, 아니면 (0, condition).
-최종 결과는 ( (False condition 의 비율, False condition 개수, 전체 condition 개수), [[첫번째 input의 각 condition별 결과], [두번째 ...], ...] ) 를 반환함.
+최종 결과는 ( (False condition coverage, False condition 의 비율, False condition 개수, 전체 condition 개수), [[첫번째 input의 각 condition별 결과], [두번째 ...], ...] ) 를 반환함.
 
 False condition 값 확인: new_instance.get_range(), False condition 범위를 리스트로 반환. range()의 list 형태를 가지고 있음.
 
@@ -40,9 +40,10 @@ False condition 값 확인: new_instance.get_range(), False condition 범위를 
 
 
 현재 버전은 parameter의 condition이 [0, max_value) 범위 중에서 10만큼의 range가 False인 경우로 지정. 원하는 error_rate를 만족하지 못하면 condition을 추가.
-원하는 확률로 특정 parameter를 특정 range로 고정할수 있음. correction_range = 원하는 range ex) [(parameter index, range(a, b), correction_rate), ...]
+원하는 확률로 특정 parameter를 특정 range로 고정할수 있음. correction_range = 원하는 range ex) [[(parameter index, range(a, b), correction_rate), ...], [(), ..], ..]
+각각의 리스트들은 개별적인 constraint condition으로 적용. [A, B, C]라는 세 조건이 주어질 경우, error condition마다 A B C중 하나가 랜덤으로 선택.
 ex) parameter 3개: [ [range(11,21), range(30,40), range(44, 54)], [range(2,12), range(51,61), range(99, 109)], ... ]
-ex2) parameter 2개 with correction: [(1, range(10,20), 0.5)] : [ [range(11,21), range(10, 20)], [range(2,12), range(51,61)], [range(52,62), range(10, 20)], [range(86,96), range(32,42)], ... ]
+ex2) parameter 2개 with correction: [[(1, range(10,20), 0.5)]] : [ [range(11,21), range(10, 20)], [range(2,12), range(51,61)], [range(52,62), range(10, 20)], [range(86,96), range(32,42)], ... ]
 
 '''
 
@@ -56,6 +57,7 @@ class Tester(SingletonInstane):
 
     def _initCondition(self, condition_range = 10, correction_range=[]): # 클래스 구현용 내부함수. self.condition을 initialize 하는 함수.
         self.condition = []
+        constraint = []
 
         current_error_rate = 0
 
@@ -63,8 +65,12 @@ class Tester(SingletonInstane):
             temp_condition = []
             temp_error_rate = 1
 
+            if len(correction_range) > 0:
+                constraint = random.choice(correction_range)
+
             for i in range(self.argnum):
-                for correction in correction_range:
+                for correction in constraint:
+                    # print(correction, '\n')
                     if correction != None and correction[0] == i and random.random() <= correction[2]:
                         temp_condition.append(correction[1])
                         temp_error_rate *= condition_range/self.max_value
@@ -73,9 +79,10 @@ class Tester(SingletonInstane):
                     rand_range_start = random.randrange(0, self.max_value-condition_range)
                     temp_condition.append(range(rand_range_start, rand_range_start+condition_range))
                     temp_error_rate *= condition_range/self.max_value
-
-            self.condition.append(temp_condition)
-            current_error_rate += temp_error_rate
+            
+            if temp_condition not in self.condition:
+                self.condition.append(temp_condition)
+                current_error_rate += temp_error_rate
 
             # self.condition.append(lambda x: x[i] in temp_condition[i] for i in range(self.argnum))
     
@@ -90,32 +97,81 @@ class Tester(SingletonInstane):
         condition_num = 0
         answer_num = 0
 
+        detected_condition = set()
+
         for args in arglist:
             assert (len(args) == self.argnum)
             result_temp = []
+            condition_num += 1
             for condition in self.condition:
-                condition_num += 1
                 for i in range(len(args)):
                     if not args[i] in condition[i]:
                         break
                 else:
                     answer_num += 1
                     result_temp.append((-1, condition))
+                    detected_condition.add(str(condition))
                     continue
                 result_temp.append((0, condition))
 
             result.append(result_temp)
 
-        return ((answer_num / condition_num, answer_num, condition_num), result)
+        return ((len(detected_condition)/len(self.condition), answer_num / condition_num, answer_num, condition_num), result)
     
     def get_range(self): # 디버깅용 함수. self.condition 안의 조건을 반환하는 함수.
         return self.condition
 
             
 
-# if __name__ == "__main__":
-#     test = Tester.instance()
-#     test.reset(argnum=2, max_value = 199, condition_range = 10, error_rate = 0.1, correction_range=[(0, range(5,15), 0.8), (1, range(10,20), 0.8)])
-#     print(test.run([[10, 10], [20, 30]]))
-#     print(test.get_range())
-#     print(len(test.get_range()))
+if __name__ == "__main__":
+    test = Tester.instance()
+    
+    result_ga = []
+    result_gacit = []
+    result_random = []
+
+    # test.reset(argnum=5, max_value = 9, condition_range = 3, error_rate = 0.1)
+
+    # for _ in range(1000):
+    #     test.reset(argnum=5, max_value = 9, condition_range = 3, error_rate = 0.1)
+
+    #     input = open('gentic_cit_900_600_100.txt')
+    #     input_gacit = eval(input.readline())
+    #     result_gacit.append(test.run(input_gacit)[0][0])
+        
+    #     input = open('ga_cit_900_600_100.txt')
+    #     input_ga = eval(input.readline())
+    #     result_ga.append(test.run(input_ga)[0][0])
+
+    #     input = open('random.txt')
+    #     input_random = eval(input.readline())
+    #     result_random.append(test.run(input_random)[0][0])
+    #     print(sum(result_gacit)/len(result_gacit), sum(result_ga)/len(result_ga), sum(result_random)/len(result_random))
+    
+    for _ in range(1000):
+        correction_range = [[(0, range(0,3), 0.7), (1, range(0,3), 0.7), (2, range(0,3), 0.7), (3, range(0,3), 0.7), (4, range(0,3), 0.7)]
+                            ,[(0, range(3,6), 0.7), (1, range(3,6), 0.7), (2, range(3,6), 0.7), (3, range(3,6), 0.7), (4, range(3,6), 0.7)]
+                            ,[(0, range(6,9), 0.7), (1, range(6,9), 0.7), (2, range(6,9), 0.7), (3, range(6,9), 0.7), (4, range(6,9), 0.7)]]
+        test.reset(argnum=5, max_value = 9, condition_range = 3, error_rate = 0.1, correction_range = correction_range)
+
+        input = open('ga_constraint.txt')
+        input_ga = eval(input.readline())
+        result_ga.append(test.run(input_ga)[0][0])
+
+        input = open('genetic_constraint.txt')
+        input_gacit = eval(input.readline())
+        result_gacit.append(test.run(input_gacit)[0][0])
+
+        input = open('random_constraint.txt')
+        input_random = eval(input.readline())
+        result_random.append(test.run(input_random)[0][0])
+        print(sum(result_gacit)/len(result_gacit), sum(result_ga)/len(result_ga), sum(result_random)/len(result_random))
+
+    # correction_range = [[(0, range(0,3), 0.7), (1, range(0,3), 0.7), (2, range(0,3), 0.7), (3, range(0,3), 0.7), (4, range(0,3), 0.7)]
+    #                     ,[(0, range(3,6), 0.7), (1, range(3,6), 0.7), (2, range(3,6), 0.7), (3, range(3,6), 0.7), (4, range(3,6), 0.7)]
+    #                     ,[(0, range(6,9), 0.7), (1, range(6,9), 0.7), (2, range(6,9), 0.7), (3, range(6,9), 0.7), (4, range(6,9), 0.7)]]
+    # test.reset(argnum=5, max_value = 9, condition_range = 3, error_rate = 0.1, correction_range = correction_range)
+
+    # print(test.run([[1,2,3,4,5]]))
+    # print(test.get_range())
+    # print(len(test.get_range()))
